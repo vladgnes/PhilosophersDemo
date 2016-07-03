@@ -7,10 +7,6 @@ public class Waiter {
         this.name ="Vlad";
     }
     public boolean GiveAPermission(Fork leftFork, Fork rightFork){
-        if(!leftFork.taken & !rightFork.taken){
-            return true;
-        }else{
-            return false;
-        }
+        return !leftFork.taken & !rightFork.taken;
     }
 }
