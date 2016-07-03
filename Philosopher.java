@@ -11,21 +11,23 @@ public class Philosopher implements Runnable {
     Thread t;
     String name;
 
-    public Philosopher(String threadname, Fork leftFork, Fork rightFork, Waiter waiter, Fork [] forks){
-        leftFork = this.leftFork;
-        rightFork = this.rightFork;
+    public Philosopher(String threadname, Fork leftfork, Fork rightfork, Waiter waiter, Fork [] forks){
+        this.leftFork = leftfork;
+        this.rightFork = rightfork;
         this.forks = forks;
         this.waiter = waiter;
         name = threadname;
         t = new Thread(this, name);
-        System.out.println(threadname + " thread have started... " );
-        t.start(); // Запуск потока
+        System.out.println(threadname + " have started... " );
+        t.start();
     }
 
     public void run(){
         try {
             for (int i = 0;i < 3; i++) {//assume that all food would be eaten by philosopher in three times
-                eat(leftFork, rightFork,forks);
+                eat(leftFork, rightFork);
+                putLeftFork();
+                putRightFork();
                 think();
             }
         }catch (InterruptedException e){
@@ -33,46 +35,61 @@ public class Philosopher implements Runnable {
         }
     }
 
-
-    public void putLeftFork(Fork fork) throws InterruptedException{
-        if(fork.taken) {
-            leftHand = true;//true means hand is holding a fork
-        }else {
-            t.wait(5000);//if a fork is taken, wait 5 second
-            putLeftFork(fork);//and check again
-        }
-        fork.taken = true;
+    public void putLeftFork(){
+        leftHand = false;
+        leftFork.taken = false;
     }
-    public void putRightFork(Fork fork) throws  InterruptedException {
-        if(fork.taken) {
-            rightHand = true;//true means hand is holding a fork
-        }else {
-            t.wait(5000);//if a fork is taken, wait 5 second and check again
-            putRightFork(fork);//and check again
+
+    public void putRightFork(){
+        leftHand = false;
+        leftFork.taken = false;
+    }
+
+    public void takeLeftFork(Fork fork) throws InterruptedException{
+        synchronized (fork) {
+            if (!fork.taken) {
+                leftHand = true;//true means hand is holding a fork
+            } else {
+                t.wait(3000);//if a fork is taken, wait 3 second
+                takeLeftFork(fork);//and check again
+            }
+            fork.taken = true;
+            System.out.println(t + " take left fork");
         }
-        fork.taken = true;
+    }
+    public void takeRightFork(Fork fork) throws  InterruptedException {
+        synchronized (fork) {
+            if (!fork.taken) {
+                rightHand = true;//true means hand is holding a fork
+            } else {
+                t.wait(3000);//if a fork is taken, wait 3 second and check again
+                takeRightFork(fork);//and check again
+            }
+            fork.taken = true;
+            System.out.println(t + " take right fork");
+        }
+
     }
     public void think() throws InterruptedException {
         System.out.println(name + " start thinking");
-        t.wait(20000);//thinking during 20 seconds
+        t.wait(5000);//thinking during 5 seconds
         System.out.println(name + " finish thinking");
     }
-    public boolean askPermission(Fork [] forks){
-         return waiter.GiveAPermission(forks);
+    public boolean askPermission(Fork leftFork, Fork rightFork){
+         return waiter.GiveAPermission(leftFork,rightFork);
     }
-    public void eat(Fork leftFork, Fork rightFork,Fork [] forks) throws InterruptedException{
-        if(askPermission(forks)) {
-            System.out.println("Waiter allowed" + name +  "to take forks");
-            putLeftFork(leftFork);
-        }
-        else {
+    public void eat(Fork leftFork, Fork rightFork) throws InterruptedException{
+        if (askPermission(leftFork, rightFork)) {
+            System.out.println("Waiter allowed " + name + " to take forks");
+            takeLeftFork(leftFork);
+        } else {
             System.out.println(name + " is waiting for forks");
             t.wait(5000);
-            eat(leftFork,rightFork,forks);
+            eat(leftFork, rightFork);
         }
-        putRightFork(rightFork);
+        takeRightFork(rightFork);
         System.out.println(name + " start eating");
-        t.wait(10000);//eating during 10 seconds
+        t.wait(5000);//eating during 5 seconds
         System.out.println(name + " finish eating");
     }
 }

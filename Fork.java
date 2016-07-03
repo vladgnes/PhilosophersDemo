@@ -3,8 +3,5 @@
  */
 public class Fork{
     boolean taken;
-    public Fork(){
-        this.taken = false;
-    }
-
+    public Fork(){this.taken = false;}
 }

@@ -6,19 +6,11 @@ public class Waiter {
     public Waiter(){
         this.name ="Vlad";
     }
-    public boolean GiveAPermission(Fork [] forks ){
-        int takenForks = 0;
-        for (int i = 0; i < 5; i++){
-            if(forks[i].taken){
-                takenForks++;
-            }
-        }
-        if(takenForks >= 4){
+    public boolean GiveAPermission(Fork leftFork, Fork rightFork){
+        if(!leftFork.taken & !rightFork.taken){
+            return true;
+        }else{
             return false;
         }
-        else {
-            return true;
-        }
-
     }
 }
