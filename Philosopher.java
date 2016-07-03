@@ -4,22 +4,20 @@
 public class Philosopher implements Runnable {
     boolean leftHand = false;
     boolean rightHand = false;
-    Fork [] forks;//set of  forks that use our philosopher
-    Waiter waiter;//waiter that serves our philosopher
+    Fork [] forks;//set of  forks that our philosopher uses
+    Waiter waiter;//waiter that our philosopher serves
     Fork leftFork;
     Fork rightFork;
-    Thread t;
     String name;
 
-    public Philosopher(String threadname, Fork leftfork, Fork rightfork, Waiter waiter, Fork [] forks){
-        this.leftFork = leftfork;
-        this.rightFork = rightfork;
+    public Philosopher(String threadName, Fork leftFork, Fork rightFork, Waiter waiter, Fork [] forks){
+        this.leftFork = leftFork;
+        this.rightFork = rightFork;
         this.forks = forks;
         this.waiter = waiter;
-        name = threadname;
-        t = new Thread(this, name);
-        System.out.println(threadname + " have started... " );
-        t.start();
+        name = threadName;
+        System.out.println(threadName + " have started... " );
+        run();
     }
 
     public void run(){
@@ -31,7 +29,7 @@ public class Philosopher implements Runnable {
                 think();
             }
         }catch (InterruptedException e){
-            System.out.println(t + " have interrupted");
+            System.out.println(name + " have interrupted");
         }
     }
 
@@ -50,11 +48,11 @@ public class Philosopher implements Runnable {
             if (!fork.taken) {
                 leftHand = true;//true means hand is holding a fork
             } else {
-                t.wait(3000);//if a fork is taken, wait 3 second
+                wait(3000);//if a fork is taken, wait 3 second
                 takeLeftFork(fork);//and check again
             }
             fork.taken = true;
-            System.out.println(t + " take left fork");
+            System.out.println(name + " take left fork");
         }
     }
     public void takeRightFork(Fork fork) throws  InterruptedException {
@@ -62,17 +60,17 @@ public class Philosopher implements Runnable {
             if (!fork.taken) {
                 rightHand = true;//true means hand is holding a fork
             } else {
-                t.wait(3000);//if a fork is taken, wait 3 second and check again
+                wait(3000);//if a fork is taken, wait 3 second and check again
                 takeRightFork(fork);//and check again
             }
             fork.taken = true;
-            System.out.println(t + " take right fork");
+            System.out.println(name + " take right fork");
         }
 
     }
     public void think() throws InterruptedException {
         System.out.println(name + " start thinking");
-        t.wait(5000);//thinking during 5 seconds
+        wait(5000);//thinking during 5 seconds
         System.out.println(name + " finish thinking");
     }
     public boolean askPermission(Fork leftFork, Fork rightFork){
@@ -84,12 +82,12 @@ public class Philosopher implements Runnable {
             takeLeftFork(leftFork);
         } else {
             System.out.println(name + " is waiting for forks");
-            t.wait(5000);
+            wait(5000);
             eat(leftFork, rightFork);
         }
         takeRightFork(rightFork);
         System.out.println(name + " start eating");
-        t.wait(5000);//eating during 5 seconds
+        wait(5000);//eating during 5 seconds
         System.out.println(name + " finish eating");
     }
 }
